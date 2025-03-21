@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:pharma_check/presentation/screens/settings_screen.dart';
+import 'package:pharma_check/presentation/screens/search_screen.dart';
+import 'package:pharma_check/presentation/screens/favorite_screen.dart';
 import 'package:pharma_check/presentation/screens/update_screen.dart';
-import '../screens/search_screen.dart';
-import '../screens/saved_screen.dart';
+import 'package:pharma_check/presentation/screens/chatbot_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:pharma_check/presentation/providers/dark_mode_provider.dart';
+import 'package:pharma_check/presentation/providers/auth_provider.dart';
 
 class BottomNavWrapper extends StatefulWidget {
+  final String role;
+  BottomNavWrapper({required this.role});
+
   @override
   _BottomNavWrapperState createState() => _BottomNavWrapperState();
 }
@@ -12,59 +19,62 @@ class BottomNavWrapper extends StatefulWidget {
 class _BottomNavWrapperState extends State<BottomNavWrapper> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    SearchScreen(),
-    SavedScreen(),
-    SettingsScreen(),
-    UpdatesScreen(),
-  ];
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    var authProvider = Provider.of<AuthProvider>(context);
+    var darkModeProvider = Provider.of<DarkModeProvider>(context);
+    bool isDarkMode = darkModeProvider.isDarkMode;
+
+    // ✅ Nếu chưa đăng nhập, điều hướng về trang login ngay lập tức
+    if (!authProvider.isLoggedIn) {
+      Future.microtask(() {
+        Navigator.pushReplacementNamed(context, '/login');
+      });
+      return Scaffold(body: Center(child: CircularProgressIndicator())); // Placeholder trong lúc điều hướng
+    }
+
+    // ✅ Tạo danh sách màn hình đúng với số lượng tab
+    List<Widget> screens = [
+      SearchScreen(),
+      FavoriteScreen(),
+      ChatbotScreen(),
+      SettingsScreen(),
+    ];
+
+    if (widget.role.trim().toLowerCase() == "admin") {
+      screens.insert(2, UpdateScreen());
+    }
+
+    // ✅ Đảm bảo currentIndex luôn hợp lệ
+    if (_currentIndex >= screens.length) {
+      _currentIndex = 0;
+    }
+
+    // ✅ Danh sách Bottom Navigation Bar Items phải khớp với danh sách màn hình
+    List<BottomNavigationBarItem> navItems = [
+      BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
+      BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Saved"),
+      if (widget.role.trim().toLowerCase() == "admin")
+        BottomNavigationBarItem(icon: Icon(Icons.update), label: "Update"),
+      BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chatbot"),
+      BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Setting"),
+    ];
+
     return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavBar(
+      body: screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: _onTabTapped,  // Gọi hàm thay đổi màn hình
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        selectedItemColor: isDarkMode ? Colors.tealAccent : Colors.blue,
+        unselectedItemColor: isDarkMode ? Colors.grey[400] : Colors.grey,
+        items: navItems,
       ),
-    );
-  }
-}
-
-class BottomNavBar extends StatelessWidget {
-  final int currentIndex;
-  final Function(int) onTap;
-
-  BottomNavBar({required this.currentIndex, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Tra Cứu',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.download),
-          label: 'Đã Lưu',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
-          label: 'Cài đặt',
-        ),
-      ],
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey,
-      currentIndex: currentIndex,
-      onTap: onTap,  // Gọi hàm chuyển đổi màn hình
     );
   }
 }

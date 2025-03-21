@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'medicines_screen.dart';
+import 'disease_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -7,7 +8,7 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  String _selectedOption = "Tra cứu thuốc"; // Mặc định chọn tra cứu thuốc
+  String _selectedOption = "Tra cứu thuốc";
   TextEditingController _searchController = TextEditingController();
   String currentSearchTerm = "";
 
@@ -19,11 +20,17 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Lấy theme hiện tại
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor, // ✅ Áp dụng nền Dark Mode
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor, // ✅ Áp dụng AppBar Dark Mode
         elevation: 1,
-        title: Text("Tra cứu", style: TextStyle(color: Colors.black)),
+        title: Text(
+          "Tra cứu",
+          style: TextStyle(color: theme.textTheme.bodyLarge?.color), // ✅ Màu chữ theo theme
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -35,7 +42,10 @@ class _SearchScreenState extends State<SearchScreen> {
               children: [
                 Expanded(
                   child: RadioListTile<String>(
-                    title: Text("Tra cứu thuốc"),
+                    title: Text(
+                      "Tra cứu thuốc",
+                      style: TextStyle(color: theme.textTheme.bodyLarge?.color), // ✅ Áp dụng màu chữ theo theme
+                    ),
                     value: "Tra cứu thuốc",
                     groupValue: _selectedOption,
                     onChanged: (String? value) {
@@ -47,13 +57,19 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
                 Expanded(
                   child: RadioListTile<String>(
-                    title: Text("Tra cứu bệnh"),
+                    title: Text(
+                      "Tra cứu bệnh",
+                      style: TextStyle(color: theme.textTheme.bodyLarge?.color), // ✅ Áp dụng màu chữ theo theme
+                    ),
                     value: "Tra cứu bệnh",
                     groupValue: _selectedOption,
                     onChanged: (String? value) {
                       setState(() {
                         _selectedOption = value!;
+                        currentSearchTerm = ""; // Xóa kết quả cũ khi đổi loại tra cứu
+                        _searchController.clear(); // Xóa text trong ô tìm kiếm
                       });
+
                     },
                   ),
                 ),
@@ -63,34 +79,34 @@ class _SearchScreenState extends State<SearchScreen> {
             // Ô tìm kiếm
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: theme.colorScheme.surfaceVariant, // 🔹 Đổi màu nền theo theme
                 borderRadius: BorderRadius.circular(8),
               ),
+
               child: TextField(
                 controller: _searchController,
+                style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                textInputAction: TextInputAction.done, // 🔹 Hỗ trợ nhập tiếng Việt đầy đủ
+                keyboardType: TextInputType.text, // 🔹 Cho phép nhập text chuẩn
                 decoration: InputDecoration(
                   hintText: "Nhập tên ${_selectedOption.toLowerCase()}",
+                  hintStyle: TextStyle(color: theme.textTheme.bodyMedium?.color),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  // Nút tìm kiếm trong TextField
+                  prefixIcon: Icon(Icons.search, color: theme.iconTheme.color),
                   suffixIcon: IconButton(
-                    icon: Icon(Icons.search, color: Colors.grey),
+                    icon: Icon(Icons.search, color: theme.iconTheme.color),
                     onPressed: () {
-                      if (_selectedOption == "Tra cứu thuốc") {
-                        setState(() {
-                          currentSearchTerm = _searchController.text;
-                        });
-                      }
+                      setState(() {
+                        currentSearchTerm = _searchController.text;
+                      });
                     },
                   ),
                 ),
                 onSubmitted: (value) {
-                  if (_selectedOption == "Tra cứu thuốc") {
-                    setState(() {
-                      currentSearchTerm = value;
-                    });
-                  }
+                  setState(() {
+                    currentSearchTerm = value;
+                  });
                 },
               ),
             ),
@@ -98,8 +114,15 @@ class _SearchScreenState extends State<SearchScreen> {
             // Hiển thị kết quả tra cứu
             Expanded(
               child: _selectedOption == "Tra cứu thuốc"
-                  ? _buildMedicineSearchScreen()
-                  : _buildDiseaseSearchScreen(),
+                  ? MedicineListScreen(
+                key: ValueKey("$_selectedOption-$currentSearchTerm"),
+                searchTerm: currentSearchTerm,
+              )
+                  : DiseaseListScreen(
+                key: ValueKey("$_selectedOption-$currentSearchTerm"),
+                searchTerm: currentSearchTerm,
+              ),
+
             ),
           ],
         ),
@@ -117,11 +140,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Giao diện tra cứu bệnh
   Widget _buildDiseaseSearchScreen() {
-    return Center(
-      child: Text(
-        'Chưa có dữ liệu về bệnh',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-      ),
+    return DiseaseListScreen(
+      key: ValueKey(currentSearchTerm),
+      searchTerm: currentSearchTerm,
     );
   }
+
 }

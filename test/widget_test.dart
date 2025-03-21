@@ -8,7 +8,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pharma_check/app.dart';
-
 import 'package:pharma_check/main.dart';
 
 void main() {

@@ -35,6 +35,7 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
     final response = await http.get(
       Uri.parse('http://10.0.2.2:3000/api/medicines/paginated?page=$page'),
     );
+    print("📢 API Response: ${response.body}");
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       setState(() {
@@ -61,9 +62,7 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       setState(() {
-        // Giả sử API search trả về kết quả trong trường 'data'
         medicines = data['data'];
-        // Không cần phân trang khi tìm kiếm
         currentPage = 1;
         totalPages = 1;
         isLoading = false;
@@ -77,10 +76,12 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
   }
 
   Widget buildPagination() {
-    // Nếu đang tìm kiếm, không hiển thị thanh phân trang.
     if (widget.searchTerm != null && widget.searchTerm!.trim().isNotEmpty) {
       return SizedBox.shrink();
     }
+
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     List<Widget> pageButtons = [];
     const int maxButtons = 3;
@@ -104,7 +105,7 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
 
     pageButtons.add(
       IconButton(
-        icon: Icon(Icons.arrow_back, size: 20),
+        icon: Icon(Icons.arrow_back, size: 20, color: isDarkMode ? Colors.white : Colors.black),
         padding: EdgeInsets.symmetric(horizontal: 4),
         constraints: BoxConstraints(),
         onPressed: currentPage > 1 ? () => fetchMedicines(currentPage - 1) : null,
@@ -119,14 +120,26 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
             padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             minimumSize: Size(30, 30),
           ),
-          child: Text("1", style: TextStyle(color: Colors.black, fontSize: 14)),
+          child: Text(
+            "1",
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black, // 🌙 Dark mode: Trắng | ☀ Light mode: Đen
+              fontSize: 14,
+            ),
+          ),
         ),
       );
       if (startPage > 2) {
         pageButtons.add(
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text("...", style: TextStyle(color: Colors.black, fontSize: 14)),
+            child: Text(
+              "...",
+              style: TextStyle(
+                color: isDarkMode ? Colors.white70 : Colors.black54, // 🌙 Màu nhạt hơn trong Dark mode
+                fontSize: 14,
+              ),
+            ),
           ),
         );
       }
@@ -145,7 +158,9 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: currentPage == i ? FontWeight.bold : FontWeight.normal,
-              color: currentPage == i ? Colors.blue : Colors.black,
+              color: currentPage == i
+                  ? (isDarkMode ? Colors.amber : Colors.blue) // 🌙 Dark mode: Vàng | ☀ Light mode: Xanh
+                  : (isDarkMode ? Colors.white : Colors.black), // 🌙 Dark mode: Trắng | ☀ Light mode: Đen
             ),
           ),
         ),
@@ -157,7 +172,13 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
         pageButtons.add(
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text("...", style: TextStyle(color: Colors.black, fontSize: 14)),
+            child: Text(
+              "...",
+              style: TextStyle(
+                color: isDarkMode ? Colors.white70 : Colors.black54,
+                fontSize: 14,
+              ),
+            ),
           ),
         );
       }
@@ -168,14 +189,20 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
             padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             minimumSize: Size(30, 30),
           ),
-          child: Text("$totalPages", style: TextStyle(color: Colors.black, fontSize: 14)),
+          child: Text(
+            "$totalPages",
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black,
+              fontSize: 14,
+            ),
+          ),
         ),
       );
     }
 
     pageButtons.add(
       IconButton(
-        icon: Icon(Icons.arrow_forward, size: 20),
+        icon: Icon(Icons.arrow_forward, size: 20, color: isDarkMode ? Colors.white : Colors.black),
         padding: EdgeInsets.symmetric(horizontal: 4),
         constraints: BoxConstraints(),
         onPressed: currentPage < totalPages ? () => fetchMedicines(currentPage + 1) : null,
@@ -191,6 +218,7 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -208,14 +236,14 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
                   height: 100,
                   child: ListTile(
                     leading: Image.network(
-                      medicine['image_url'],
+                      medicine['hinh_anh'],
                       width: 50,
                       height: 50,
                       fit: BoxFit.cover,
                     ),
-                    title: Text(medicine['medicine_name']),
+                    title: Text(medicine['ten_thuoc']),
                     subtitle: Text(
-                      medicine['uses'],
+                      medicine['cong_dung'],
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
