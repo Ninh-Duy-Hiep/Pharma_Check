@@ -1,35 +1,37 @@
 import 'package:flutter/material.dart';
+import '../providers/favoriteDisease_provider.dart';
+import 'package:provider/provider.dart';
 
 class DiseaseScreenDetail extends StatefulWidget {
-  final Map diseaseId;
+  final Map diseaseData;  // Đổi tên biến để rõ ràng
 
-  DiseaseScreenDetail({required this.diseaseId});
+  DiseaseScreenDetail({required this.diseaseData});
 
   @override
   _DiseaseScreenDetail createState() => _DiseaseScreenDetail();
 }
 
 class _DiseaseScreenDetail extends State<DiseaseScreenDetail> {
-  bool isFavorite = false;
+  TextEditingController noteController = TextEditingController();
 
-  // Hàm xử lý nội dung có xuống dòng hợp lý
+  // Xử lý xuống dòng hợp lý
   String formatText(String text) {
-    return text.replaceAll(RegExp(r'\s{2,}'), '\n\n'); // Xuống dòng khi gặp khoảng trắng dài
+    return text.replaceAll(RegExp(r'\s{2,}'), '\n\n');
   }
 
-  // Hàm xử lý danh sách thành bullet points
+  // Xử lý danh sách thành bullet points
   Widget formatList(String text) {
-    List<String> items = text.split(RegExp(r'\n|;|-')); // Tách danh sách bằng xuống dòng hoặc dấu chấm phẩy
+    List<String> items = text.split(RegExp(r'\n|;|-'));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: items.map((item) {
-        if (item.trim().isEmpty) return SizedBox(); // Bỏ qua dòng trống
+        if (item.trim().isEmpty) return SizedBox(); 
         return Padding(
           padding: EdgeInsets.only(bottom: 6),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("• ", style: TextStyle(fontWeight: FontWeight.bold)), // Gạch đầu dòng
+              Text("• ", style: TextStyle(fontWeight: FontWeight.bold)), 
               Expanded(child: Text(item.trim())),
             ],
           ),
@@ -39,14 +41,18 @@ class _DiseaseScreenDetail extends State<DiseaseScreenDetail> {
   }
 
   // Hàm build nội dung text hoặc list
-  Widget buildContent(BuildContext context, String label, String content) {
-    bool isList = content.contains(";") || content.contains("\n") || content.contains("-"); // Kiểm tra nếu nội dung là danh sách
+  Widget buildContent(BuildContext context, String label, String? content) {
+    if (content == null || content.isEmpty) return SizedBox(); // Kiểm tra null
+    bool isList = content.contains(";") || content.contains("\n") || content.contains("-");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor),
         ),
         SizedBox(height: 6),
         isList ? formatList(content) : Text(formatText(content), style: TextStyle(fontSize: 16)),
@@ -57,13 +63,19 @@ class _DiseaseScreenDetail extends State<DiseaseScreenDetail> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark; // Kiểm tra Dark Mode
+    var favoriteProvider = Provider.of<FavoriteDiseaseProvider>(context);
+
+    // Lấy dữ liệu bệnh từ widget.diseaseData
+    var disease = widget.diseaseData;
+    bool isFavorite = favoriteProvider.isFavorite(disease["id"] ?? 0);  // Kiểm tra null
+
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Áp dụng nền theo theme
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          widget.diseaseId['ten_benh'],
+          disease['ten_benh'] ?? "Không có tên",
           style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -75,28 +87,54 @@ class _DiseaseScreenDetail extends State<DiseaseScreenDetail> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildContent(context, 'Tên bệnh', widget.diseaseId['ten_benh']),
-              buildContent(context, 'Định nghĩa', widget.diseaseId['dinh_nghia']),
-              buildContent(context, 'Nguyên nhân', widget.diseaseId['nguyen_nhan']),
-              buildContent(context, 'Triệu chứng', widget.diseaseId['trieu_chung']),
-              buildContent(context, 'Chẩn đoán', widget.diseaseId['chan_doan']),
-              buildContent(context, 'Điều trị', widget.diseaseId['dieu_tri']),
+              buildContent(context, 'Tên bệnh', disease['ten_benh']),
+              buildContent(context, 'Định nghĩa', disease['dinh_nghia']),
+              buildContent(context, 'Nguyên nhân', disease['nguyen_nhan']),
+              buildContent(context, 'Triệu chứng', disease['trieu_chung']),
+              buildContent(context, 'Chẩn đoán', disease['chan_doan']),
+              buildContent(context, 'Điều trị', disease['dieu_tri']),
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          setState(() {
-            isFavorite = !isFavorite;
-          });
+          if (isFavorite) {
+            favoriteProvider.removeFavorite(disease["id"]);
+          } else {
+            _showNoteDialog(context, favoriteProvider);
+          }
         },
-        backgroundColor: isDarkMode ? Colors.grey[800] : Colors.white,
-        child: Icon(
-          isFavorite ? Icons.favorite : Icons.favorite_border,
-          color: isFavorite ? Colors.red : (isDarkMode ? Colors.white : Colors.black),
-        ),
+        child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: Colors.red),
       ),
+    );
+  }
+
+  void _showNoteDialog(BuildContext context, FavoriteDiseaseProvider provider) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Thêm vào yêu thích"),
+          content: TextField(
+            controller: noteController,
+            decoration: InputDecoration(labelText: "Ghi chú (tuỳ chọn)"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Hủy"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await provider.addFavorite(widget.diseaseData["id"], noteController.text);
+                Navigator.pop(context);
+              },
+              child: Text("Lưu"),
+            ),
+          ],
+        );
+      },
     );
   }
 }

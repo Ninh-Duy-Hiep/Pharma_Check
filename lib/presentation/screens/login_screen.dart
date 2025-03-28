@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/auth/login'),
+        Uri.parse('http://192.168.10.152:3000/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'username': username, 'password': password}),
       );
@@ -47,18 +47,19 @@ class _LoginScreenState extends State<LoginScreen> {
         String token = data['token'];
         String role = data['user']['role'];
         String savedUsername = data['user']['username'];
-        int userId = data['user']['id']; // ✅ Lấy user_id từ API
+        int userId = data['user']['id'];
 
         // Lưu vào SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
+        print("🔹 LoginScreen - user_id trước khi lưu: ${prefs.getInt('user_id')}");
         await prefs.setString('token', token);
         await prefs.setString('role', role);
         await prefs.setString('username', savedUsername);
-        await prefs.setInt('user_id', userId); // ✅ Lưu user_id
-        print("✅ Đã lưu user_id vào SharedPreferences: ${prefs.getInt('user_id')}");
-        print("Saved User ID: $userId"); // Debug log
+        await prefs.setInt('user_id', userId);
+        print("🔹 LoginScreen - Đã lưu user_id: $userId");
+        print("🔹 LoginScreen - SharedPreferences - user_id sau khi lưu: ${prefs.getInt('user_id')}");
 
-        // Cập nhật AuthProvider (nếu có)
+        // Cập nhật AuthProvider
         Provider.of<AuthProvider>(context, listen: false).setAuth(token, role, savedUsername, userId);
 
         // Chuyển sang màn hình Home
@@ -101,9 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
             _isLoading
                 ? CircularProgressIndicator()
                 : ElevatedButton(
-              onPressed: _login,
-              child: Text('Đăng nhập'),
-            ),
+                    onPressed: _login,
+                    child: Text('Đăng nhập'),
+                  ),
             TextButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/register');

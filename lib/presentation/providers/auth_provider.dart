@@ -23,7 +23,11 @@ class AuthProvider extends ChangeNotifier {
     await prefs.setString('token', token ?? "");
     await prefs.setString('role', role ?? "");
     if (username != null) await prefs.setString('username', username);
-    if (userId != null) await prefs.setInt('user_id', userId); // ✅ Lưu user_id vào SharedPreferences
+    if (userId != null) {
+      await prefs.setInt('user_id', userId);
+      print("🔹 AuthProvider - Đã lưu user_id: $userId");
+      print("🔹 SharedPreferences - user_id sau khi lưu: ${prefs.getInt('user_id')}");
+    }
   }
 
   Future<void> logout() async {
@@ -34,6 +38,9 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    print("🔹 AuthProvider - user_id trước khi logout: ${prefs.getInt('user_id')}");
     await prefs.clear();
+    print("🔹 AuthProvider - Đã xóa tất cả dữ liệu trong SharedPreferences");
+    // Provider.of<FavoriteMedicineProvider>(navigatorKey.currentContext!, listen: false).clearFavorites();
   }
 }

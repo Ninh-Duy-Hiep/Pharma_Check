@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String baseUrl =
-      'http://10.0.2.2:3000/api/favoritesMedicine';
+      'http://192.168.10.152:3000/api/favoritesMedicine';
 
   // Thêm thuốc vào danh sách yêu thích
   static Future<Map<String, dynamic>> addFavoriteMedicine({
@@ -11,23 +11,33 @@ class ApiService {
     required int medicineId,
     required String note,
   }) async {
+    final bodyData = jsonEncode({
+      "user_id": userId,
+      "medicine_id": medicineId,
+      "note": note,
+    });
+
+    print("📤 Gửi request: $bodyData");
+    print("🔹 ApiService - userId khi gọi API: $userId");
+
     final response = await http.post(
       Uri.parse('$baseUrl/add'),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "user_id": userId,
-        "medicine_id": medicineId,
-        "note": note,
-      }),
+      body: bodyData,
     );
 
-    return jsonDecode(response.body);
+    final responseData = jsonDecode(response.body);
+    print("📥 API Response: $responseData");
+
+    return responseData;
   }
 
   // Lấy danh sách thuốc yêu thích
   static Future<List<dynamic>> getFavoriteMedicines(int userId) async {
+    print("🔍 Đang gọi API với userId: $userId");
+    print("🔹 ApiService - userId khi lấy danh sách: $userId");
     final response = await http.get(Uri.parse('$baseUrl?user_id=$userId'));
-
+    print("🔹 Response: ${response.body}");
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return data["data"];
@@ -70,5 +80,25 @@ class ApiService {
     );
 
     return jsonDecode(response.body);
+  }
+
+  // 🆕 Hàm mới để lấy danh sách nhãn của thuốc yêu thích
+  static Future<List<dynamic>> getFavoriteLabels(int userId) async {
+    final url = Uri.parse("$baseUrl/favorite-labels?user_id=$userId");
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data;
+      } else {
+        print("❌ Lỗi khi lấy nhãn: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      print("❌ Lỗi khi gọi API: $e");
+      return [];
+    }
   }
 }

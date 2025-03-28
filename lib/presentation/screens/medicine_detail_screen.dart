@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/favorite_provider.dart';
+import '../providers/favoriteMedicine_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 class MedicineDetailScreen extends StatefulWidget {
   final Map medicine;
@@ -14,7 +16,8 @@ class MedicineDetailScreen extends StatefulWidget {
 class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
   TextEditingController noteController = TextEditingController();
 
-  void _showNoteDialog(BuildContext context, FavoriteProvider provider) {
+  void _showNoteDialog(
+      BuildContext context, FavoriteMedicineProvider provider) {
     showDialog(
       context: context,
       builder: (context) {
@@ -31,7 +34,8 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await provider.addFavorite(widget.medicine["id"], noteController.text);
+                await provider.addFavorite(
+                    widget.medicine["id"], noteController.text);
                 Navigator.pop(context);
               },
               child: Text("Lưu"),
@@ -44,11 +48,18 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var favoriteProvider = Provider.of<FavoriteProvider>(context);
+    print("📌 Debug in MedicineDetailScreen: ${widget.medicine}");
+
+    var favoriteProvider = Provider.of<FavoriteMedicineProvider>(context);
     bool isFavorite = favoriteProvider.isFavorite(widget.medicine["id"]);
 
+    // Lấy thông tin từ Medicine object bên trong JSON
+    final medicineData =
+        widget.medicine["Medicine"] ?? {}; // Nếu null thì gán map rỗng
+
     return Scaffold(
-      appBar: AppBar(title: Text(widget.medicine['ten_thuoc'])),
+      appBar: AppBar(
+          title: Text(widget.medicine['ten_thuoc'] ?? "Không có tên thuốc")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -57,75 +68,81 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
             // Hiển thị hình ảnh thuốc
             Center(
               child: Image.network(
-                widget.medicine['hinh_anh'],
+                widget.medicine['hinh_anh'] ?? "",
                 height: 200,
-                errorBuilder: (context, error, stackTrace) => Icon(Icons.image, size: 200, color: Colors.grey),
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.image, size: 200, color: Colors.grey),
+              ),
+            ),
+            SizedBox(height: 5),
+
+            // Đường dẫn tìm kiếm trên Google
+            InkWell(
+              onTap: () {
+                final searchQuery =
+                    Uri.encodeComponent(widget.medicine['ten_thuoc'] ?? "");
+                final url = "https://www.google.com/search?q=$searchQuery";
+                launchUrl(Uri.parse(url));
+              },
+              child: Text(
+                "🔍 Tìm kiếm trên Google",
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 16,
+                  // decoration: TextDecoration.underline,
+                ),
               ),
             ),
             SizedBox(height: 16),
 
             // Tên thuốc
-            Text(widget.medicine['ten_thuoc'], style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(widget.medicine['ten_thuoc'] ?? "Không có thông tin",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
 
             Divider(),
 
             // Thành phần
-            Text("Thành phần:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(widget.medicine['thanh_phan'], style: TextStyle(fontSize: 16)),
+            Text("Thành phần:",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(widget.medicine['thanh_phan'] ?? "Không có thông tin",
+                style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
 
             // Công dụng
-            Text("Công dụng:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(widget.medicine['cong_dung'], style: TextStyle(fontSize: 16)),
+            Text("Công dụng:",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(widget.medicine['cong_dung'] ?? "Không có thông tin",
+                style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
 
             // Tác dụng phụ
-            Text("Tác dụng phụ:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(widget.medicine['tac_dung_phu'], style: TextStyle(fontSize: 16)),
+            Text("Tác dụng phụ:",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(widget.medicine['tac_dung_phu'] ?? "Không có thông tin",
+                style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
 
             // Nhà sản xuất
-            Text("Nhà sản xuất:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(widget.medicine['nha_san_xuat'], style: TextStyle(fontSize: 16)),
+            Text("Nhà sản xuất:",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(widget.medicine['nha_san_xuat'] ?? "Không có thông tin",
+                style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
 
             Divider(),
-
-            // Đánh giá
-            Text("Đánh giá:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Row(
-              children: [
-                Icon(Icons.sentiment_satisfied, color: Colors.green),
-                SizedBox(width: 8),
-                Text("Tốt: ${widget.medicine['danh_gia_tot']}"),
-              ],
-            ),
-            Row(
-              children: [
-                Icon(Icons.sentiment_neutral, color: Colors.orange),
-                SizedBox(width: 8),
-                Text("Trung bình: ${widget.medicine['danh_gia_trung_binh']}"),
-              ],
-            ),
-            Row(
-              children: [
-                Icon(Icons.sentiment_dissatisfied, color: Colors.red),
-                SizedBox(width: 8),
-                Text("Kém: ${widget.medicine['danh_gia_kem']}"),
-              ],
-            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (isFavorite) {
-            favoriteProvider.removeFavorite(widget.medicine["id"]);
+            favoriteProvider.removeFavorite(context, widget.medicine["id"]);
           } else {
             _showNoteDialog(context, favoriteProvider);
           }
         },
-        child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: Colors.red),
+        child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border,
+            color: Colors.red),
       ),
     );
   }

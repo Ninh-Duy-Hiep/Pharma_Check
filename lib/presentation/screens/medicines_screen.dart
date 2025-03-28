@@ -33,7 +33,7 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
       isLoading = true;
     });
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:3000/api/medicines/paginated?page=$page'),
+      Uri.parse('http://192.168.10.152:3000/api/medicines/paginated?page=$page'),
     );
     print("📢 API Response: ${response.body}");
     if (response.statusCode == 200) {
@@ -57,7 +57,7 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
       isLoading = true;
     });
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:3000/api/medicines/search?searchTerm=$keyword'),
+      Uri.parse('http://192.168.10.152:3000/api/medicines/search?searchTerm=$keyword'),
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

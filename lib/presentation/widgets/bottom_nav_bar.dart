@@ -33,16 +33,17 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
       return Scaffold(body: Center(child: CircularProgressIndicator())); // Placeholder trong lúc điều hướng
     }
 
+     bool isAdmin = widget.role.trim().toLowerCase() == "admin";
     // ✅ Tạo danh sách màn hình đúng với số lượng tab
     List<Widget> screens = [
       SearchScreen(),
-      FavoriteScreen(),
+      if (!isAdmin) FavoriteScreen(),
       ChatbotScreen(),
       SettingsScreen(),
     ];
 
-    if (widget.role.trim().toLowerCase() == "admin") {
-      screens.insert(2, UpdateScreen());
+    if (isAdmin) {
+      screens.insert(2, UpdateScreen()); // Thêm UpdateScreen nếu là admin
     }
 
     // ✅ Đảm bảo currentIndex luôn hợp lệ
@@ -53,10 +54,9 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
     // ✅ Danh sách Bottom Navigation Bar Items phải khớp với danh sách màn hình
     List<BottomNavigationBarItem> navItems = [
       BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-      BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Saved"),
-      if (widget.role.trim().toLowerCase() == "admin")
-        BottomNavigationBarItem(icon: Icon(Icons.update), label: "Update"),
+      if (!isAdmin) BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Saved"),
       BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chatbot"),
+      if (isAdmin) BottomNavigationBarItem(icon: Icon(Icons.update), label: "Update"),
       BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Setting"),
     ];
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_check/presentation/providers/dark_mode_provider.dart';
 import 'package:pharma_check/presentation/providers/auth_provider.dart';
+import 'package:pharma_check/presentation/providers/favoriteMedicine_provider.dart';
+import 'package:pharma_check/presentation/providers/label_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override
@@ -27,15 +29,22 @@ class SettingsScreen extends StatelessWidget {
                 SizedBox(height: 20),
                 ElevatedButton.icon(
                   onPressed: () async {
-                    await authProvider.logout(); // ✅ Đảm bảo logout hoàn tất trước khi điều hướng
+                    print("🔹 SettingsScreen - Bắt đầu quá trình đăng xuất");
+                    Provider.of<FavoriteMedicineProvider>(context, listen: false).clearFavorites();
+                    Provider.of<LabelProvider>(context, listen: false).filterByLabel("Tất cả nhãn");
+                    await authProvider
+                        .logout(); // ✅ Xóa token, role, username, user_id
                     if (!context.mounted) return;
-                    Navigator.pushReplacementNamed(context, '/login'); // ✅ Không cần kiểm tra `mounted` trong StatelessWidget
+
+                    Navigator.pushNamedAndRemoveUntil(context, '/login',
+                        (route) => false); // ✅ Xóa hết stack và về login
                   },
                   icon: Icon(Icons.logout, color: Colors.white),
-                  label: Text('Đăng xuất', style: TextStyle(color: Colors.white)),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurpleAccent),
+                  label:
+                      Text('Đăng xuất', style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurpleAccent),
                 ),
-
               ],
             )
           else
