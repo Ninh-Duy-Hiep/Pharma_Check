@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoriteDiseaseService {
   static const String baseUrl =
-      "http://192.168.10.152:3000/api/favoritesDisease";
+      "http://192.168.60.152:3000/api/favoritesDisease";
 
   // Lấy danh sách bệnh yêu thích theo user_id
   static Future<List<Map<String, dynamic>>> getFavoriteDiseases() async {

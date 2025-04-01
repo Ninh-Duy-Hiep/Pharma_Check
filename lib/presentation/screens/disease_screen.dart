@@ -46,7 +46,7 @@ class _DiseaseListScreenState extends State<DiseaseListScreen> {
 
   /// API: Lấy tất cả bệnh
   Future<void> fetchAllDiseases() async {
-    String url = 'http://192.168.10.152:3000/api/diseases';
+    String url = 'http://192.168.60.152:3000/api/diseases';
     print('Fetching all diseases from: $url');
 
     try {
@@ -67,7 +67,7 @@ class _DiseaseListScreenState extends State<DiseaseListScreen> {
 
   /// API: Tìm kiếm bệnh
   Future<void> searchDiseases(String searchTerm) async {
-    String url = 'http://192.168.10.152:3000/api/diseases/search?searchTerm=${Uri.encodeComponent(searchTerm)}';
+    String url = 'http://192.168.60.152:3000/api/diseases/search?searchTerm=${Uri.encodeComponent(searchTerm)}';
     print('Searching diseases with term: $searchTerm from: $url');
 
     try {

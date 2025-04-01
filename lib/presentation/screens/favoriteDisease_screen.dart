@@ -170,7 +170,7 @@ class _FavoriteDiseasesScreenState extends State<FavoriteDiseaseScreen> {
                               "Dữ liệu Disease trước khi chuyển trang: $diseaseData");
 
                           if (diseaseData == null || diseaseData.isEmpty) {
-                            MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                            ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text("Dữ liệu không hợp lệ!")),
                             );
                             return;
@@ -460,7 +460,7 @@ class _FavoriteDiseasesScreenState extends State<FavoriteDiseaseScreen> {
                                         
                                         if (context.mounted) {
                                           // Hiển thị thông báo sau khi BottomSheet đã đóng
-                                          MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                                          ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
                                               content: Text(
                                                 "Gán nhãn '${label['name']}' thành công!",
@@ -487,7 +487,7 @@ class _FavoriteDiseasesScreenState extends State<FavoriteDiseaseScreen> {
                                       
                                       if (context.mounted) {
                                         // Hiển thị thông báo lỗi sau khi BottomSheet đã đóng
-                                        MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                                        ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
                                             content: Text(
                                               "Bệnh đã được gán trong nhãn này !",
@@ -543,7 +543,7 @@ class _FavoriteDiseasesScreenState extends State<FavoriteDiseaseScreen> {
                 await labelProvider.removeLabel(labelId);
 
                 if (context.mounted) {
-                  MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Xóa nhãn thành công")),
                   );
                 }
@@ -633,7 +633,7 @@ class _FavoriteDiseasesScreenState extends State<FavoriteDiseaseScreen> {
 
                       Navigator.of(context).pop();
 
-                      MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text("Cập nhật nhãn thành công")),
                       );

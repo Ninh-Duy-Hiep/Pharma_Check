@@ -30,12 +30,12 @@ class _FavoriteMedicineScreenState extends State<FavoriteMedicineScreen> {
     });
   }
 
-  @override
-  void dispose() {
-    // Reset dropdown về "Tất cả nhãn" khi rời khỏi màn hình
-    Provider.of<LabelProvider>(context, listen: false).filterByLabel("Tất cả nhãn");
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   // Reset dropdown về "Tất cả nhãn" khi rời khỏi màn hình
+  //   Provider.of<LabelProvider>(context, listen: false).filterByLabel("Tất cả nhãn");
+  //   super.dispose();
+  // }
 
   bool _showButtons = false;
 
@@ -171,7 +171,7 @@ class _FavoriteMedicineScreenState extends State<FavoriteMedicineScreen> {
                         //      "Dữ liệu Medicine trước khi chuyển trang: $medicineData");
 
                         if (medicineData == null || medicineData.isEmpty) {
-                          MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text("Dữ liệu không hợp lệ!")),
                           );
                           return;
@@ -459,7 +459,7 @@ class _FavoriteMedicineScreenState extends State<FavoriteMedicineScreen> {
                                         
                                         if (context.mounted) {
                                           // Hiển thị thông báo sau khi BottomSheet đã đóng
-                                          MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                                          ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
                                               content: Text(
                                                 "Gán nhãn '${label['name']}' thành công!",
@@ -486,7 +486,7 @@ class _FavoriteMedicineScreenState extends State<FavoriteMedicineScreen> {
                                       
                                       if (context.mounted) {
                                         // Hiển thị thông báo lỗi sau khi BottomSheet đã đóng
-                                        MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                                        ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
                                             content: Text(
                                               "Thuốc đã được gán trong nhãn này !",
@@ -592,7 +592,7 @@ class _FavoriteMedicineScreenState extends State<FavoriteMedicineScreen> {
                         "#${selectedColor.value.toRadixString(16).substring(2).toUpperCase()}",
                       );
 
-                    MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Cập nhật nhãn thành công")),
                     );
 
@@ -641,7 +641,7 @@ class _FavoriteMedicineScreenState extends State<FavoriteMedicineScreen> {
                 await labelProvider.removeLabel(labelId);
 
                 if (context.mounted) {
-                  MyApp.scaffoldMessengerKey.currentState?.showSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Xóa nhãn thành công")),
                   );
                 }

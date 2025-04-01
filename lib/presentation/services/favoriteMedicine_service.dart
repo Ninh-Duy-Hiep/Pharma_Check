@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String baseUrl =
-      'http://192.168.10.152:3000/api/favoritesMedicine';
+      'http://192.168.60.152:3000/api/favoritesMedicine';
 
   // Thêm thuốc vào danh sách yêu thích
   static Future<Map<String, dynamic>> addFavoriteMedicine({

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LabelService {
-  static const String baseUrl = "http://192.168.10.152:3000/api/labels";
+  static const String baseUrl = "http://192.168.60.152:3000/api/labels";
 
   Future<int?> _getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

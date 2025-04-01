@@ -47,7 +47,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
       return; // Không gửi yêu cầu API nếu có trường trống
     }
 
-    String url = 'http://192.168.10.152:3000/api/medicines';
+    String url = 'http://192.168.60.152:3000/api/medicines';
 
     final response = await http.post(
       Uri.parse(url),
@@ -102,7 +102,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
       return; // Không gửi yêu cầu API nếu có trường trống
     }
 
-    String url = 'http://192.168.10.152:3000/api/diseases';
+    String url = 'http://192.168.60.152:3000/api/diseases';
 
     final response = await http.post(
       Uri.parse(url),
@@ -171,8 +171,8 @@ class _UpdateScreenState extends State<UpdateScreen> {
       if (result != null) {
         File file = File(result.files.single.path!);
         String url = type == 'medicine'
-            ? 'http://192.168.10.152:3000/api/medicines/upload'
-            : 'http://192.168.10.152:3000/api/diseases/upload';
+            ? 'http://192.168.60.152:3000/api/medicines/upload'
+            : 'http://192.168.60.152:3000/api/diseases/upload';
 
         var request = http.MultipartRequest('POST', Uri.parse(url));
         request.files.add(await http.MultipartFile.fromPath('file', file.path));

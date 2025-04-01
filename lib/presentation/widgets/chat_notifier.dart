@@ -18,7 +18,7 @@ class ChatNotifier extends StateNotifier<List<Message>> {
     state = [...state, Message(text: text, isUser: true)];
 
     final response = await http.get(Uri.parse(
-        'http://192.168.10.152:8000/chatbot/?question=${Uri.encodeComponent(text)}'));
+        'http://192.168.60.152:8000/chatbot/?question=${Uri.encodeComponent(text)}'));
 
     if (response.statusCode == 200) {
       final data = json.decode(utf8.decode(response.bodyBytes));
